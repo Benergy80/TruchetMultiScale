@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Multi-scale Truchet Pattern Composer - An interactive tool for creating complex geometric patterns">
     <title>Multi-scale Truchet Pattern Composer</title>
     <style>
         body {
@@ -27,12 +28,12 @@
         }
 
         #tile-selector-container {
-            display: flex;
+            display: none;
             justify-content: center;
             padding: 5px;
             background: white;
             position: fixed;
-            bottom: -80px;
+            bottom: 0;
             left: 0;
             right: 0;
             z-index: 1000;
@@ -102,7 +103,7 @@
             position: fixed;
             left: 50%;
             transform: translateX(-50%);
-            bottom: 60px;
+            top: 20px;
             background: white;
             padding: 10px;
             border-radius: 5px;
