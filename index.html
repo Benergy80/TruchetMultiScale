@@ -148,47 +148,39 @@
     </style>
 </head>
 <body>
-    <!-- P5.js Libraries from CDN -->
-    <!-- Using version 1.4.0 as it's stable and includes necessary features -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" 
-            integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g==" 
-            crossorigin="anonymous" 
-            referrerpolicy="no-referrer">
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.dom.min.js"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer">
-    </script>
+    <!-- Load libraries in correct order, using reliable CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 
-    <!-- Core Application Scripts -->
-    <!-- Using relative paths for better GitHub Pages compatibility -->
-    <script src="./queue.js"></script>
-    <script src="./Rectangle.js"></script>
-    <script src="./wingtile.js"></script>
-    <script src="./quadtree.js"></script>
-    <script src="./tileselector.js"></script>
-    <script src="./sketch.js"></script>
+    <!-- Core Scripts in correct dependency order -->
+    <!-- First load Rectangle.js as it's required by other scripts -->
+    <script src="Rectangle.js"></script>
+    <script src="queue.js"></script>
+    <script src="wingtile.js"></script>
+    <script src="quadtree.js"></script>
+    <script src="sketch.js"></script>
 
-    <!-- Fallback for script loading errors -->
+    <!-- Error handling -->
     <script>
-        window.addEventListener('error', function(e) {
-            if (e.target.tagName === 'SCRIPT') {
-                console.error('Script loading failed:', e.target.src);
-                alert('Failed to load required scripts. Please check your internet connection and try again.');
-            }
-        }, true);
-    </script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
+            return false;
+        };
 
-    <!-- Loading indicator -->
-    <div id="loading" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
-         background:white; padding:20px; border-radius:5px; display:none;">
-        Loading...
-    </div>
-
-    <script>
-        document.getElementById('loading').style.display = 'block';
+        // Verify script loading
         window.addEventListener('load', function() {
-            document.getElementById('loading').style.display = 'none';
+            console.log('All scripts loaded');
+            if (typeof Rectangle === 'undefined') {
+                console.error('Rectangle class not loaded');
+            }
+            if (typeof Queue === 'undefined') {
+                console.error('Queue class not loaded');
+            }
+            if (typeof wingtile === 'undefined') {
+                console.error('wingtile class not loaded');
+            }
+            if (typeof QuadTree === 'undefined') {
+                console.error('QuadTree class not loaded');
+            }
         });
     </script>
 </body>
