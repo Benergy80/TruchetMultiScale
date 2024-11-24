@@ -11,6 +11,7 @@
             padding: 0;
             font-family: monospace;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         canvas {
@@ -41,7 +42,7 @@
         }
 
         .tile-grid {
-            display: flex;
+            display: none;
             gap: 5px;
             flex-wrap: nowrap;
             justify-content: center;
@@ -133,19 +134,62 @@
         * {
             user-select: none;
         }
+
+        @media (max-width: 768px) {
+            .info-text {
+                font-size: 12px;
+                padding: 8px;
+            }
+            
+            .checkbox-container {
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- P5.js Libraries -->
-    <script src="libraries/p5.js"></script>
-    <script src="libraries/p5.dom.js"></script>
+    <!-- P5.js Libraries from CDN -->
+    <!-- Using version 1.4.0 as it's stable and includes necessary features -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" 
+            integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g==" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.dom.min.js"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer">
+    </script>
 
-    <!-- Core Scripts -->
-    <script src="queue.js"></script>
-    <script src="Rectangle.js"></script>
-    <script src="wingtile.js"></script>
-    <script src="quadtree.js"></script>
-    <script src="tileselector.js"></script>
-    <script src="sketch.js"></script>
+    <!-- Core Application Scripts -->
+    <!-- Using relative paths for better GitHub Pages compatibility -->
+    <script src="./queue.js"></script>
+    <script src="./Rectangle.js"></script>
+    <script src="./wingtile.js"></script>
+    <script src="./quadtree.js"></script>
+    <script src="./tileselector.js"></script>
+    <script src="./sketch.js"></script>
+
+    <!-- Fallback for script loading errors -->
+    <script>
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'SCRIPT') {
+                console.error('Script loading failed:', e.target.src);
+                alert('Failed to load required scripts. Please check your internet connection and try again.');
+            }
+        }, true);
+    </script>
+
+    <!-- Loading indicator -->
+    <div id="loading" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
+         background:white; padding:20px; border-radius:5px; display:none;">
+        Loading...
+    </div>
+
+    <script>
+        document.getElementById('loading').style.display = 'block';
+        window.addEventListener('load', function() {
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
 </body>
 </html>
