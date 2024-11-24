@@ -5,11 +5,17 @@ let mousepos;
 var highlightcheckbox;
 let lineMode = false;    
 let combinedMode = false;  
+let tileSelector;
+let allowedTileTypes = null;
 
 // Add state history arrays
 let stateHistoryLeft = [];
 let stateHistoryRight = [];
 const MAX_HISTORY = 50; 
+
+window.updateAllowedTileTypes = function(types) {
+  allowedTileTypes = types.length > 0 ? types : null;
+}
 
 function saveState() {
   stateHistoryLeft.push(qtreeLeft.getState());
@@ -78,6 +84,9 @@ function setup() {
   qtreeRight = new QuadTree(boundsRight, 0);
 
   mousepos = new point(mouseX, mouseY);
+  
+  // Initialize TileSelector
+  tileSelector = new TileSelector();
 
   // Create checkbox and note
   let checkboxContainer = createDiv('');
