@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Multi-scale Truchet Pattern Composer - An interactive tool for creating complex geometric patterns">
     <title>Multi-scale Truchet Pattern Composer</title>
     <style>
         body {
@@ -11,7 +10,6 @@
             padding: 0;
             font-family: monospace;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         canvas {
@@ -29,12 +27,12 @@
         }
 
         #tile-selector-container {
-            display: none;
+            display: flex;
             justify-content: center;
             padding: 5px;
             background: white;
             position: fixed;
-            bottom: 0;
+            bottom: -80px;
             left: 0;
             right: 0;
             z-index: 1000;
@@ -42,7 +40,7 @@
         }
 
         .tile-grid {
-            display: none;
+            display: flex;
             gap: 5px;
             flex-wrap: nowrap;
             justify-content: center;
@@ -104,7 +102,7 @@
             position: fixed;
             left: 50%;
             transform: translateX(-50%);
-            top: 20px;
+            bottom: 60px;
             background: white;
             padding: 10px;
             border-radius: 5px;
@@ -134,55 +132,19 @@
         * {
             user-select: none;
         }
-
-        @media (max-width: 768px) {
-            .info-text {
-                font-size: 12px;
-                padding: 8px;
-            }
-            
-            .checkbox-container {
-                padding: 8px;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Load libraries in correct order, using reliable CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <!-- P5.js Libraries -->
+    <script src="libraries/p5.js"></script>
+    <script src="libraries/p5.dom.js"></script>
 
-    <!-- Core Scripts in correct dependency order -->
-    <!-- First load Rectangle.js as it's required by other scripts -->
-    <script src="Rectangle.js"></script>
+    <!-- Core Scripts -->
     <script src="queue.js"></script>
+    <script src="Rectangle.js"></script>
     <script src="wingtile.js"></script>
     <script src="quadtree.js"></script>
     <script src="tileselector.js"></script>
     <script src="sketch.js"></script>
-
-    <!-- Error handling -->
-    <script>
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
-            return false;
-        };
-
-        // Verify script loading
-        window.addEventListener('load', function() {
-            console.log('All scripts loaded');
-            if (typeof Rectangle === 'undefined') {
-                console.error('Rectangle class not loaded');
-            }
-            if (typeof Queue === 'undefined') {
-                console.error('Queue class not loaded');
-            }
-            if (typeof wingtile === 'undefined') {
-                console.error('wingtile class not loaded');
-            }
-            if (typeof QuadTree === 'undefined') {
-                console.error('QuadTree class not loaded');
-            }
-        });
-    </script>
 </body>
 </html>
