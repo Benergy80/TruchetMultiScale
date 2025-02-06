@@ -214,7 +214,7 @@ function keyPressed() {
     mousepos = new point(mouseX, mouseY);
     
     let maxDepth = 8; // Increased from 6 to 8
-    let subdivisions = 3; // Increased from 2 to 3
+    let subdivisions = 8; // Increased from 3 to 8
     
     if (qtreeLeft.boundary.contains(mousepos)) {
       qtreeLeft.randomSubdivide(subdivisions, maxDepth);
