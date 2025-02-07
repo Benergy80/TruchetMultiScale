@@ -8,7 +8,7 @@ class TileSelector {
         this.grid.class('tile-grid');
         this.grid.parent(this.container);
 
-        this.tileTypes = ['/', '\\', '-', '|', '+', '+.', 'x.',
+        this.tileTypes = ['/', '\\', '-', '|', '+.', 'x.',
                          'fne', 'fsw', 'fnw', 'fse',
                          'tn', 'ts', 'te', 'tw'];
                          
@@ -33,9 +33,6 @@ class TileSelector {
                 break;
             case '|':
                 path = `M ${center} ${padding} L ${center} ${size-padding}`;
-                break;
-            case '+':
-                path = `M ${padding} ${center} L ${size-padding} ${center} M ${center} ${padding} L ${center} ${size-padding}`;
                 break;
             case '+.':
                 path = `M ${padding} ${padding} H ${size-padding} V ${size-padding} H ${padding} Z`;
