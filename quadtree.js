@@ -250,10 +250,20 @@ class QuadTree {
     this.divisions[2] = new QuadTree(se, subtier);
     this.divisions[3] = new QuadTree(sw, subtier);
 
-    // Let QuadTree constructor handle phase calculation
+    // Randomly select between "/" and "\" for each new division
     for (let i = 0; i < 4; i++) {
-      this.divisions[i].setColorScheme(this.currentScheme);
-      this.divisions[i].currentLineColor = this.currentLineColor;
+        this.divisions[i].motif = Math.random() < 0.5 ? "/" : "\\";
+        this.divisions[i].motifindex = this.divisions[i].motiflist.indexOf(this.divisions[i].motif);
+        this.divisions[i].currentRotation = 0;
+        this.divisions[i].setColorScheme(this.currentScheme);
+        this.divisions[i].currentLineColor = this.currentLineColor;
+        
+        this.divisions[i].tile = new wingtile(
+            this.divisions[i].motif,
+            this.divisions[i].phase,
+            this.divisions[i].boundary,
+            [...this.divisions[i].color, this.divisions[i].lineColors[this.divisions[i].currentLineColor]]
+        );
     }
     
     this.divided = true;
