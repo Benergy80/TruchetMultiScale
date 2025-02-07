@@ -1,5 +1,4 @@
-let qtreeLeft;
-let qtreeRight;
+let qtree;
 let bounds;
 let mousepos;
 var highlightcheckbox;
@@ -8,9 +7,7 @@ let combinedMode = false;
 let tileSelector;
 let allowedTileTypes = null;
 
-// Add state history arrays
-let stateHistoryLeft = [];
-let stateHistoryRight = [];
+let stateHistory = [];
 const MAX_HISTORY = 50; 
 
 window.updateAllowedTileTypes = function(types) {
@@ -18,21 +15,16 @@ window.updateAllowedTileTypes = function(types) {
 }
 
 function saveState() {
-  stateHistoryLeft.push(qtreeLeft.getState());
-  stateHistoryRight.push(qtreeRight.getState());
-  
-  if (stateHistoryLeft.length > MAX_HISTORY) {
-    stateHistoryLeft.shift();
-    stateHistoryRight.shift();
+  stateHistory.push(qtree.getState());
+  if (stateHistory.length > MAX_HISTORY) {
+    stateHistory.shift();
   }
 }
 
 function undo() {
-  if (stateHistoryLeft.length > 0 && stateHistoryRight.length > 0) {
-    const previousStateLeft = stateHistoryLeft.pop();
-    const previousStateRight = stateHistoryRight.pop();
-    qtreeLeft.setState(previousStateLeft);
-    qtreeRight.setState(previousStateRight);
+  if (stateHistory.length > 0) {
+    const previousState = stateHistory.pop();
+    qtree.setState(previousState);
   }
 }
 
@@ -43,18 +35,14 @@ function exportHighRes() {
   
   if (lineMode && !combinedMode) {
     highResCanvas.background(255);
-    qtreeLeft.drawtiles(true, highResCanvas);
-    qtreeRight.drawtiles(true, highResCanvas);
+    qtree.drawtiles(true, highResCanvas);
   } else if (combinedMode) {
-    highResCanvas.background(qtreeLeft.color[1]);
-    qtreeLeft.drawtiles(false, highResCanvas);
-    qtreeRight.drawtiles(false, highResCanvas);
-    qtreeLeft.drawtiles(true, highResCanvas);
-    qtreeRight.drawtiles(true, highResCanvas);
+    highResCanvas.background(qtree.color[1]);
+    qtree.drawtiles(false, highResCanvas);
+    qtree.drawtiles(true, highResCanvas);
   } else {
-    highResCanvas.background(qtreeLeft.color[1]);
-    qtreeLeft.drawtiles(false, highResCanvas);
-    qtreeRight.drawtiles(false, highResCanvas);
+    highResCanvas.background(qtree.color[1]);
+    qtree.drawtiles(false, highResCanvas);
   }
 
   let timestamp = year() + nf(month(), 2) + nf(day(), 2) + "-" + nf(hour(), 2) + nf(minute(), 2) + nf(second(), 2);
@@ -63,7 +51,6 @@ function exportHighRes() {
 }
 
 function setup() {
-  // Prevent space bar scrolling globally
   window.addEventListener('keydown', function(e) {
     if(e.key === ' ') {
       e.preventDefault();
@@ -71,24 +58,43 @@ function setup() {
     }
   });
 
-  canvasSize = windowHeight * 0.85;
-  canvasW = canvasSize * 0.5;
-  canvasH = canvasSize * 0.5;
+  canvasSize = windowHeight * 1.7;
+  let canvasW = canvasSize;
+  let canvasH = canvasSize / 2;
 
-  cnv = createCanvas(canvasSize * 2, canvasSize);
+  cnv = createCanvas(canvasSize, canvasH);
 
-  let boundsLeft = new Rectangle(canvasSize/2, canvasSize/2, canvasW, canvasH);
-  qtreeLeft = new QuadTree(boundsLeft, 0);
-
-  let boundsRight = new Rectangle(canvasSize * 1.5, canvasSize/2, canvasW, canvasH);
-  qtreeRight = new QuadTree(boundsRight, 0);
+  // Create a single boundary for the top half
+  bounds = new Rectangle(canvasSize/2, 0, canvasW/2, canvasH);
+  qtree = new QuadTree(bounds, 0);
+  
+  // Initial subdivision with specific pattern
+  qtree.divide();
+  
+  // Set specific patterns for each quadrant
+  qtree.divisions[0].motif = '/';  // Northeast quadrant
+  qtree.divisions[0].motifindex = qtree.divisions[0].motiflist.indexOf('/');
+  qtree.divisions[0].tile = new wingtile('fsw', qtree.divisions[0].phase, qtree.divisions[0].boundary, 
+    [...qtree.divisions[0].color, qtree.divisions[0].lineColors[qtree.divisions[0].currentLineColor]]);
+  
+  qtree.divisions[1].motif = '/';  // Northwest quadrant
+  qtree.divisions[1].motifindex = qtree.divisions[1].motiflist.indexOf('/');
+  qtree.divisions[1].tile = new wingtile('fse', qtree.divisions[1].phase, qtree.divisions[1].boundary,
+    [...qtree.divisions[1].color, qtree.divisions[1].lineColors[qtree.divisions[1].currentLineColor]]);
+  
+  qtree.divisions[2].motif = '/';  // Southeast quadrant
+  qtree.divisions[2].motifindex = qtree.divisions[2].motiflist.indexOf('/');
+  qtree.divisions[2].tile = new wingtile('fnw', qtree.divisions[2].phase, qtree.divisions[2].boundary,
+    [...qtree.divisions[2].color, qtree.divisions[2].lineColors[qtree.divisions[2].currentLineColor]]);
+  
+  qtree.divisions[3].motif = '/';  // Southwest quadrant
+  qtree.divisions[3].motifindex = qtree.divisions[3].motiflist.indexOf('/');
+  qtree.divisions[3].tile = new wingtile('fne', qtree.divisions[3].phase, qtree.divisions[3].boundary,
+    [...qtree.divisions[3].color, qtree.divisions[3].lineColors[qtree.divisions[3].currentLineColor]]);
 
   mousepos = new point(mouseX, mouseY);
-  
-  // Initialize TileSelector
   tileSelector = new TileSelector();
 
-  // Create checkbox and note
   let checkboxContainer = createDiv('');
   checkboxContainer.position(width / 2 - 200, height + 20);
   checkboxContainer.style('font-family', 'monospace');
@@ -104,15 +110,7 @@ function setup() {
   highlightcheckbox.style('display', 'block');
   highlightcheckbox.style('text-align', 'center');
   highlightcheckbox.style('margin-bottom', '15px');
-  
-  let note = createDiv('Note: Always subdivide the righthand tile first<br>to avoid glitching artifacts.');
-  note.parent(checkboxContainer);
-  note.style('font-family', 'monospace');
-  note.style('font-size', '14px');
-  note.style('margin-top', '15px');
-  note.style('text-align', 'center');
 
-  // Create instructions text
   instructions = createDiv(
     'Controls:<br>' +
     'Left Click: Rotate Tile<br>' +
@@ -134,7 +132,6 @@ function setup() {
   instructions.style('font-size', '14px');
   instructions.position(20, height + 20);
 
-  // Create credits text
   credits = createDiv(
     'Multi-scale Truchet Pattern Composer assembled by ChiLab.<br><br>' +
     'Developed using techniques researched by Christopher Carlson and published in <a href="https://archive.bridgesmathart.org/2018/bridges2018-39.pdf" target="_blank" style="color: inherit; text-decoration: underline;"><em>Bridges Conference Proceedings</em>, Stockholm, 2018</a><br><br>' +
@@ -151,111 +148,88 @@ function setup() {
   credits.position(windowWidth - 440, height + 20);
   credits.style('max-width', '400px');
 
-  // Save initial state
   saveState();
-
   document.addEventListener('contextmenu', event => event.preventDefault());
 }
 
 function draw() {
   if (lineMode && !combinedMode) {
     background(255);
-    qtreeLeft.drawtiles(true);
-    qtreeRight.drawtiles(true);
+    qtree.drawtiles(true);
   } else if (combinedMode) {
-    background(qtreeLeft.color[1]);
-    qtreeLeft.drawtiles(false);
-    qtreeRight.drawtiles(false);
-    qtreeLeft.drawtiles(true);
-    qtreeRight.drawtiles(true);
+    background(qtree.color[1]);
+    qtree.drawtiles(false);
+    qtree.drawtiles(true);
   } else {
-    background(qtreeLeft.color[1]);
-    qtreeLeft.drawtiles(false);
-    qtreeRight.drawtiles(false);
+    background(qtree.color[1]);
+    qtree.drawtiles(false);
   }
 
   mousepos = new point(mouseX, mouseY);
 
   if (highlightcheckbox.checked()) {
-    qtreeLeft.highlight(mousepos);
-    qtreeLeft.show();
-    qtreeRight.highlight(mousepos);
-    qtreeRight.show();
+    qtree.highlight(mousepos);
+    qtree.show();
   }
 }
 
 function keyPressed() {
-  if (key === ' ') {  // Space bar
-    event.preventDefault();  // Prevent scrolling
+  if (key === ' ') {
+    event.preventDefault();
     saveState();
     mousepos = new point(mouseX, mouseY);
-    qtreeLeft.cycleTile(mousepos);
-    qtreeRight.cycleTile(mousepos);
-  } else if (key === 'c' || key === 'C') {  // Color cycling
+    qtree.cycleTile(mousepos);
+  } else if (key === 'c' || key === 'C') {
     saveState();
-    qtreeLeft.cycleColorScheme();
-    qtreeRight.cycleColorScheme();
-  } else if (key === 'x' || key === 'X') {  // Export high-res
+    qtree.cycleColorScheme();
+  } else if (key === 'x' || key === 'X') {
     exportHighRes();
-  } else if (key === 'z' || key === 'Z') {  // Undo
+  } else if (key === 'z' || key === 'Z') {
     undo();
-  } else if (key === 'l' || key === 'L') {  // Toggle line mode
+  } else if (key === 'l' || key === 'L') {
     if (combinedMode) {
       combinedMode = false;
     }
     lineMode = !lineMode;
-  } else if (key === 'k' || key === 'K') {  // Toggle combined mode
+  } else if (key === 'k' || key === 'K') {
     if (lineMode) {
       lineMode = false;
     }
     combinedMode = !combinedMode;
-  } else if (key === 'i' || key === 'I') {  // Random Subdivision
-    saveState();
+  } else if (key === 'i' || key === 'I') {
     mousepos = new point(mouseX, mouseY);
-    
-    let maxDepth = 8; // Increased from 6 to 8
-    let subdivisions = 8; // Increased from 3 to 8
-    
-    if (qtreeLeft.boundary.contains(mousepos)) {
-      qtreeLeft.randomSubdivide(subdivisions, maxDepth);
+    // Only proceed if mouse is within the visible canvas area
+    if (mouseY >= 0 && mouseY <= height) {
+      saveState();
+      let maxDepth = 8;
+      let subdivisions = 8;
+      qtree.randomSubdivide(subdivisions, maxDepth);
     }
-    if (qtreeRight.boundary.contains(mousepos)) {
-      qtreeRight.randomSubdivide(subdivisions, maxDepth);
-    }
-  } else if (key === 'v' || key === 'V') {  // Cycle line color
+  } else if (key === 'v' || key === 'V') {
     saveState();
-    qtreeLeft.cycleLineColor();
-    qtreeRight.cycleLineColor();
-  } else if (key === 'r' || key === 'R') {  // Reverse subdivision
+    qtree.cycleLineColor();
+  } else if (key === 'r' || key === 'R') {
     mousepos = new point(mouseX, mouseY);
-    let changed = false;
-    
-    if (qtreeLeft.boundary.contains(mousepos)) {
-      saveState();
-      changed = qtreeLeft.reverseSubdivide(mousepos);
-    } else if (qtreeRight.boundary.contains(mousepos)) {
-      saveState();
-      changed = qtreeRight.reverseSubdivide(mousepos);
+    // Don't allow reversal of base quadrants
+    if (!qtree.isBaseQuadrant(mousepos)) {
+      let changed = qtree.reverseSubdivide(mousepos);
+      if (changed) saveState();
     }
   }
 }
 
 function mouseClicked(event) {
   mousepos = new point(mouseX, mouseY);
-  
   if (mouseButton === LEFT) {
     saveState();
-    qtreeLeft.rotateTile(mousepos);
-    qtreeRight.rotateTile(mousepos);
+    qtree.rotateTile(mousepos);
   }
 }
 
 function mousePressed() {
   mousepos = new point(mouseX, mouseY);
-  
   if (mouseButton === RIGHT) {
     saveState();
-    qtreeLeft.split(mousepos);
-    qtreeRight.split(mousepos);
+    qtree.split(mousepos);
   }
 }
