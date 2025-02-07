@@ -5,7 +5,7 @@ class QuadTree {
     this.divisions = {};
     this.tier = tier;
     this.overbox = false;
-    this.motiflist = ["/","\\", "-", "|","+.","x.",  "+", "fne","fsw","fnw","fse","tn","ts","te","tw"];
+    this.motiflist = ["/","\\", "-", "|","+.","x.", "fne","fsw","fnw","fse","tn","ts","te","tw"];
     this.rotations = [0, 90, 180, 270];
     
     this.colorSchemes = {
@@ -64,6 +64,23 @@ class QuadTree {
     }
 
     return null;
+  }
+
+  isBaseQuadrant(point) {
+    if (!this.boundary.contains(point)) {
+      return false;
+    }
+
+    // If this is one of the initial four quadrants
+    if (this.divided && this.tier === 0) {
+      for (let i = 0; i < 4; i++) {
+        if (this.divisions[i].boundary.contains(point) && !this.divisions[i].divided) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   }
 
   reverseSubdivide(point) {
@@ -375,8 +392,7 @@ class QuadTree {
     return false;
   }
 
-  randomSubdivide(n, maxDepth = 8) {  // Increased maxDepth
-    // Add debug logging
+  randomSubdivide(n, maxDepth = 8) {
     console.log(`Current tier: ${this.tier}, MaxDepth: ${maxDepth}`);
     
     if (n <= 0 || this.tier >= maxDepth) {
